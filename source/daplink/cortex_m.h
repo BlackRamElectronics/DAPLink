@@ -37,7 +37,8 @@ __attribute__((always_inline))
 static cortex_int_state_t cortex_int_get_and_disable(void)
 {
     cortex_int_state_t state;
-    state = __disable_irq();
+    state = 0;
+    __disable_irq();
     return state;
 }
 

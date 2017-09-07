@@ -19,7 +19,7 @@
  * limitations under the License.
  */
 
-#include "RTL.h"
+//#include "RTL.h"
 #include "rl_usb.h"
 #include "usb.h"
 

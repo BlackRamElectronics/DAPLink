@@ -1,12 +1,12 @@
 /*----------------------------------------------------------------------------
  *      CMSIS-RTOS  -  RTX
  *----------------------------------------------------------------------------
- *      Name:    RT_SEMAPHORE.H
- *      Purpose: Implements binary and counting semaphores
- *      Rev.:    V4.70
+ *      Name:    RT_MEMORY.H
+ *      Purpose: Interface functions for Dynamic Memory Management System
+ *      Rev.:    V4.79
  *----------------------------------------------------------------------------
  *
- * Copyright (c) 1999-2009 KEIL, 2009-2013 ARM Germany GmbH
+ * Copyright (c) 1999-2009 KEIL, 2009-2015 ARM Germany GmbH
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -32,14 +32,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *---------------------------------------------------------------------------*/
 
-/* Functions */
-extern void      rt_sem_init  (OS_ID semaphore, U16 token_count);
-extern OS_RESULT rt_sem_delete(OS_ID semaphore);
-extern OS_RESULT rt_sem_send  (OS_ID semaphore);
-extern OS_RESULT rt_sem_wait  (OS_ID semaphore, U16 timeout);
-extern void      isr_sem_send (OS_ID semaphore);
-extern void      rt_sem_psh (P_SCB p_CB);
+/* Types */
+typedef struct mem {              /* << Memory Pool management struct >>     */
+  struct mem *next;               /* Next Memory Block in the list           */
+  U32         len;                /* Length of data block                    */
+} MEMP;
 
-/*----------------------------------------------------------------------------
- * end of file
- *---------------------------------------------------------------------------*/
+/* Functions */
+extern U32   rt_init_mem  (void *pool, U32  size);
+extern void *rt_alloc_mem (void *pool, U32  size);
+extern U32   rt_free_mem  (void *pool, void *mem);

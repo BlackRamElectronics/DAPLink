@@ -1,23 +1,36 @@
-/**
- * @file    rt_TypeDef.h
- * @brief   
+/*----------------------------------------------------------------------------
+ *      CMSIS-RTOS  -  RTX
+ *----------------------------------------------------------------------------
+ *      Name:    RT_TYPEDEF.H
+ *      Purpose: Type Definitions
+ *      Rev.:    V4.79
+ *----------------------------------------------------------------------------
  *
- * DAPLink Interface Firmware
- * Copyright (c) 2009-2016, ARM Limited, All Rights Reserved
- * SPDX-License-Identifier: Apache-2.0
+ * Copyright (c) 1999-2009 KEIL, 2009-2015 ARM Germany GmbH
+ * All rights reserved.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *  - Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *  - Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *  - Neither the name of ARM  nor the names of its contributors may be used 
+ *    to endorse or promote products derived from this software without 
+ *    specific prior written permission.
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS AND CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *---------------------------------------------------------------------------*/
 
 /* Types */
 typedef char               S8;
@@ -51,10 +64,12 @@ typedef struct OS_TCB {
   U16    events;                  /* Event flags                             */
   U16    waits;                   /* Wait flags                              */
   void   **msg;                   /* Direct message passing when task waits  */
-  U8     ret_val;                 /* Return value upon completion of a wait  */
+  struct OS_MUCB *p_mlnk;         /* Link pointer for mutex owner list       */
+  U8     prio_base;               /* Base priority                           */
 
   /* Hardware dependant part: specific for CM processor                      */
-  U8     ret_upd;                 /* Updated return value                    */
+  U8     stack_frame;             /* Stack frame: 0=Basic, 1=Extended,       */
+                                  /* (2=VFP/D16 stacked, 4=NEON/D32 stacked) */
   U16    priv_stack;              /* Private stack size, 0= system assigned  */
   U32    tsk_stack;               /* Current task Stack pointer (R13)        */
   U32    *stack;                  /* Pointer to Task Stack memory block      */
@@ -62,9 +77,8 @@ typedef struct OS_TCB {
   /* Task entry point used for uVision debugger                              */
   FUNCP  ptask;                   /* Task entry address                      */
 } *P_TCB;
-#define TCB_RETVAL      32        /* 'ret_val' offset                        */
-#define TCB_RETUPD      33        /* 'ret_upd' offset                        */
-#define TCB_TSTACK      36        /* 'tsk_stack' offset                      */
+#define TCB_STACKF      37        /* 'stack_frame' offset                    */
+#define TCB_TSTACK      40        /* 'tsk_stack' offset                      */
 
 typedef struct OS_PSFE {          /* Post Service Fifo Entry                 */
   void  *id;                      /* Object Identification                   */
@@ -101,6 +115,7 @@ typedef struct OS_XCB {
 
 typedef struct OS_MCB {
   U8     cb_type;                 /* Control Block Type                      */
+  U8     state;                   /* State flag variable                     */
   U8     isr_st;                  /* State flag variable for isr functions   */
   struct OS_TCB *p_lnk;           /* Chain of tasks waiting for message      */
   U16    first;                   /* Index of the message list begin         */
@@ -112,16 +127,17 @@ typedef struct OS_MCB {
 
 typedef struct OS_SCB {
   U8     cb_type;                 /* Control Block Type                      */
+  U8     mask;                    /* Semaphore token mask                    */
   U16    tokens;                  /* Semaphore tokens                        */
   struct OS_TCB *p_lnk;           /* Chain of tasks waiting for tokens       */
 } *P_SCB;
 
 typedef struct OS_MUCB {
   U8     cb_type;                 /* Control Block Type                      */
-  U8     prio;                    /* Owner task default priority             */
   U16    level;                   /* Call nesting level                      */
   struct OS_TCB *p_lnk;           /* Chain of tasks waiting for mutex        */
   struct OS_TCB *owner;           /* Mutex owner task                        */
+  struct OS_MUCB *p_mlnk;         /* Chain of mutexes by owner task          */
 } *P_MUCB;
 
 typedef struct OS_XTMR {
@@ -142,11 +158,10 @@ typedef struct OS_BM {
 } *P_BM;
 
 /* Definitions */
-#define __TRUE          1
-#define __FALSE         0
+#define __TRUE          1U
+#define __FALSE         0U
 #define NULL            ((void *) 0)
 
 /*----------------------------------------------------------------------------
  * end of file
  *---------------------------------------------------------------------------*/
-

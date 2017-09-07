@@ -22,6 +22,19 @@
 #ifndef __USB_H__
 #define __USB_H__
 
+typedef uint8_t U8;
+typedef uint16_t U16;
+typedef uint32_t U32;
+typedef _Bool BOOL;
+#define __FALSE 0
+#define __TRUE !0
+
+#define __weak __attribute__((weak))
+#define __task __attribute__((__naked__))
+#define __packed __attribute__((packed))
+#include <stddef.h>
+
+
 /* General USB header files                                                   */
 #include "usb_def.h"
 #include "usb_cdc.h"
