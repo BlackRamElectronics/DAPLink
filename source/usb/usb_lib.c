@@ -2233,7 +2233,7 @@ const U8 USBD_OtherSpeedConfigDescriptor_HS[] = {
 
 #define USBD_STR_VAL(n)                  \
  { sizeof(USBD_##n), USB_STRING_DESCRIPTOR_TYPE, USBD_##n }
-
+ 
 __weak \
 const struct {
     struct {
